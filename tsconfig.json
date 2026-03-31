@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "outDir": "./dist",
+    "rootDir": "./",
+    "paths": {
+      "src/*": ["./src/*"],
+      "@ant/*": ["./stubs/@ant/*/index.ts", "./stubs/@ant/*.ts"]
+    },
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "jsx": "react"
+  },
+  "include": ["src/**/*"]
+}
