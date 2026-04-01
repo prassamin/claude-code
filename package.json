@@ -1,7 +1,7 @@
 {
-  "name": "claude-code",
+  "name": "claw code",
   "version": "1.0.0",
-  "description": "Claude Code CLI",
+  "description": "Claw Code CLI",
   "main": "dist/entrypoints/cli.js",
   "type": "module",
   "scripts": {
