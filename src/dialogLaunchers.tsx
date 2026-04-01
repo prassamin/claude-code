@@ -7,13 +7,13 @@
  * perf/extract-interactive-helpers and perf/launch-repl.
  */
 import React from 'react';
-import type { AssistantSession } from './assistant/sessionDiscovery.js';
-import type { StatsStore } from './context/stats.js';
-import type { Root } from './ink.js';
-import { renderAndRun, showSetupDialog } from './interactiveHelpers.js';
-import { KeybindingSetup } from './keybindings/KeybindingProviderSetup.js';
-import type { AppState } from './state/AppStateStore.js';
-import type { AgentMemoryScope } from './tools/AgentTool/agentMemory.js';
+import type { AssistantSession } from './assistant/sessionDiscovery';
+import type { StatsStore } from './context/stats';
+import type { Root } from './ink';
+import { renderAndRun, showSetupDialog } from './interactiveHelpers';
+import { KeybindingSetup } from './keybindings/KeybindingProviderSetup';
+import type { AppState } from './state/AppStateStore';
+import type { AgentMemoryScope } from './tools/AgentTool/agentMemory';
 import type { TeleportRemoteResponse } from './utils/conversationRecovery.js';
 import type { FpsMetrics } from './utils/fpsTracker.js';
 import type { ValidationError } from './utils/settings/validation.js';
@@ -60,7 +60,7 @@ export async function launchAssistantSessionChooser(root: Root, props: {
 }): Promise<string | null> {
   const {
     AssistantSessionChooser
-  } = await import('./assistant/AssistantSessionChooser.js');
+  } = await import('./assistant/AssistantSessionChooser');
   return showSetupDialog<string | null>(root, done => <AssistantSessionChooser sessions={props.sessions} onSelect={id => done(id)} onCancel={() => done(null)} />);
 }
 
@@ -74,7 +74,7 @@ export async function launchAssistantInstallWizard(root: Root): Promise<string |
   const {
     NewInstallWizard,
     computeDefaultInstallDir
-  } = await import('./commands/assistant/assistant.js');
+  } = await import('./commands/assistant/assistant');
   const defaultDir = await computeDefaultInstallDir();
   let rejectWithError: (reason: Error) => void;
   const errorPromise = new Promise<never>((_, reject) => {

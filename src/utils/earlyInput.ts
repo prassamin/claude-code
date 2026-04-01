@@ -11,14 +11,14 @@
  * 3. stopCapturingEarlyInput() is called automatically when input is consumed
  */
 
-import { lastGrapheme } from './intl.js'
+import { lastGrapheme } from "./intl.js";
 
 // Buffer for early input characters
-let earlyInputBuffer = ''
+let earlyInputBuffer = "";
 // Flag to track if we're currently capturing
-let isCapturing = false
+let isCapturing = false;
 // Reference to the readable handler so we can remove it later
-let readableHandler: (() => void) | null = null
+let readableHandler: (() => void) | null = null;
 
 /**
  * Start capturing stdin data early, before the REPL is initialized.
@@ -33,36 +33,36 @@ export function startCapturingEarlyInput(): void {
   if (
     !process.stdin.isTTY ||
     isCapturing ||
-    process.argv.includes('-p') ||
-    process.argv.includes('--print')
+    process.argv.includes("-p") ||
+    process.argv.includes("--print")
   ) {
-    return
+    return;
   }
 
-  isCapturing = true
-  earlyInputBuffer = ''
+  isCapturing = true;
+  earlyInputBuffer = "";
 
   // Set stdin to raw mode and use 'readable' event like Ink does
   // This ensures compatibility with how the REPL will handle stdin later
   try {
-    process.stdin.setEncoding('utf8')
-    process.stdin.setRawMode(true)
-    process.stdin.ref()
+    process.stdin.setEncoding("utf8");
+    process.stdin.setRawMode(true);
+    process.stdin.ref();
 
     readableHandler = () => {
-      let chunk = process.stdin.read()
+      let chunk = process.stdin.read();
       while (chunk !== null) {
-        if (typeof chunk === 'string') {
-          processChunk(chunk)
+        if (typeof chunk === "string") {
+          processChunk(chunk);
         }
-        chunk = process.stdin.read()
+        chunk = process.stdin.read();
       }
-    }
+    };
 
-    process.stdin.on('readable', readableHandler)
+    process.stdin.on("readable", readableHandler);
   } catch {
     // If we can't set raw mode, just silently continue without early capture
-    isCapturing = false
+    isCapturing = false;
   }
 }
 
@@ -70,68 +70,68 @@ export function startCapturingEarlyInput(): void {
  * Process a chunk of input data
  */
 function processChunk(str: string): void {
-  let i = 0
+  let i = 0;
   while (i < str.length) {
-    const char = str[i]!
-    const code = char.charCodeAt(0)
+    const char = str[i]!;
+    const code = char.charCodeAt(0);
 
     // Ctrl+C (code 3) - stop capturing and exit immediately.
     // We use process.exit here instead of gracefulShutdown because at this
     // early stage of startup, the shutdown machinery isn't initialized yet.
     if (code === 3) {
-      stopCapturingEarlyInput()
+      stopCapturingEarlyInput();
       // eslint-disable-next-line custom-rules/no-process-exit
-      process.exit(130) // Standard exit code for Ctrl+C
-      return
+      process.exit(130); // Standard exit code for Ctrl+C
+      return;
     }
 
     // Ctrl+D (code 4) - EOF, stop capturing
     if (code === 4) {
-      stopCapturingEarlyInput()
-      return
+      stopCapturingEarlyInput();
+      return;
     }
 
     // Backspace (code 127 or 8) - remove last grapheme cluster
     if (code === 127 || code === 8) {
       if (earlyInputBuffer.length > 0) {
-        const last = lastGrapheme(earlyInputBuffer)
-        earlyInputBuffer = earlyInputBuffer.slice(0, -(last.length || 1))
+        const last = lastGrapheme(earlyInputBuffer);
+        earlyInputBuffer = earlyInputBuffer.slice(0, -(last.length || 1));
       }
-      i++
-      continue
+      i++;
+      continue;
     }
 
     // Skip escape sequences (arrow keys, function keys, focus events, etc.)
     // All escape sequences start with ESC (0x1B) and end with a byte in 0x40-0x7E
     if (code === 27) {
-      i++ // Skip the ESC character
+      i++; // Skip the ESC character
       // Skip until the terminating byte (@ to ~) or end of string
       while (
         i < str.length &&
         !(str.charCodeAt(i) >= 64 && str.charCodeAt(i) <= 126)
       ) {
-        i++
+        i++;
       }
-      if (i < str.length) i++ // Skip the terminating byte
-      continue
+      if (i < str.length) i++; // Skip the terminating byte
+      continue;
     }
 
     // Skip other control characters (except tab and newline)
     if (code < 32 && code !== 9 && code !== 10 && code !== 13) {
-      i++
-      continue
+      i++;
+      continue;
     }
 
     // Convert carriage return to newline
     if (code === 13) {
-      earlyInputBuffer += '\n'
-      i++
-      continue
+      earlyInputBuffer += "\n";
+      i++;
+      continue;
     }
 
     // Add printable characters and allowed control chars to buffer
-    earlyInputBuffer += char
-    i++
+    earlyInputBuffer += char;
+    i++;
   }
 }
 
@@ -141,14 +141,14 @@ function processChunk(str: string): void {
  */
 export function stopCapturingEarlyInput(): void {
   if (!isCapturing) {
-    return
+    return;
   }
 
-  isCapturing = false
+  isCapturing = false;
 
   if (readableHandler) {
-    process.stdin.removeListener('readable', readableHandler)
-    readableHandler = null
+    process.stdin.removeListener("readable", readableHandler);
+    readableHandler = null;
   }
 
   // Don't reset stdin state - the REPL's Ink App will manage stdin state.
@@ -162,17 +162,17 @@ export function stopCapturingEarlyInput(): void {
  * Automatically stops capturing when called.
  */
 export function consumeEarlyInput(): string {
-  stopCapturingEarlyInput()
-  const input = earlyInputBuffer.trim()
-  earlyInputBuffer = ''
-  return input
+  stopCapturingEarlyInput();
+  const input = earlyInputBuffer.trim();
+  earlyInputBuffer = "";
+  return input;
 }
 
 /**
  * Check if there is any early input available without consuming it.
  */
 export function hasEarlyInput(): boolean {
-  return earlyInputBuffer.trim().length > 0
+  return earlyInputBuffer.trim().length > 0;
 }
 
 /**
@@ -180,12 +180,12 @@ export function hasEarlyInput(): boolean {
  * in the prompt input when the REPL renders. Does not auto-submit.
  */
 export function seedEarlyInput(text: string): void {
-  earlyInputBuffer = text
+  earlyInputBuffer = text;
 }
 
 /**
  * Check if early input capture is currently active.
  */
 export function isCapturingEarlyInput(): boolean {
-  return isCapturing
+  return isCapturing;
 }
